@@ -1,0 +1,22 @@
+---
+- name: install wireguard
+  hosts: all
+  become: true
+  tasks:
+    - name: update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+    
+    - name: install wireguard
+      ansible.builtin.apt:
+        name: wireguard
+        state: present
+    
+    - name: ip forward
+      ansible.posix.sysctl:
+        name: net.ipv4.ip_forward
+        value: "1"
+        sysctl_set: yes
+        state: present
+        reload: yes
+      when: inventory_hostname in groups['vps_group']
