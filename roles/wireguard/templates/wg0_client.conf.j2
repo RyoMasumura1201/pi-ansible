@@ -1,0 +1,9 @@
+[Interface]
+Address = {{ wireguard_address }}
+PrivateKey = {{ wireguard_private_key }}
+
+[Peer]
+PublicKey = {{ wireguard_peer_public_key }}
+AllowedIPs = 10.0.0.0/24
+Endpoint = {{ wireguard_vps_public_ip }}:{{ wireguard_port }}
+PersistentKeepalive = 25

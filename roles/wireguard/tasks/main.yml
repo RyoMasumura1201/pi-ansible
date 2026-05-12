@@ -1,0 +1,40 @@
+---
+- name: update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: install wireguard
+  ansible.builtin.apt:
+    name: wireguard
+    state: present
+
+- name: ip forward
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: "1"
+    sysctl_set: yes
+    state: present
+    reload: true
+  when: inventory_hostname in groups['vps_group']
+
+- name: create wg0.conf in vps
+  ansible.builtin.template:
+    src: templates/wg0_server.conf.j2
+    dest: /etc/wireguard/wg0.conf
+    mode: '0600'
+  when: inventory_hostname in groups['vps_group']
+  notify: restart wireguard
+
+- name: create wg0.conf in pi
+  ansible.builtin.template:
+    src: templates/wg0_client.conf.j2
+    dest: /etc/wireguard/wg0.conf
+    mode: '0600'
+  when: inventory_hostname in groups['pi_group']
+  notify: restart wireguard
+
+- name: enable and start wireguard
+  ansible.builtin.systemd:
+    name: wg-quick@wg0
+    enabled: true
+    state: started

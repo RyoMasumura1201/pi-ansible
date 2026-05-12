@@ -1,0 +1,6 @@
+wireguard_address: "10.0.0.1/24"
+wireguard_port: 51820
+wireguard_private_key: "{{ vault_wireguard_private_key }}"
+wireguard_peer_public_key: "vHci6Jc9BBzRGO24gDAiK7wk0n7YlenDwxLEJ85IDjY="
+wireguard_pi_ip: "10.0.0.2"
+vps_public_interface: "ens3"

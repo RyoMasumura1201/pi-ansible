@@ -1,0 +1,10 @@
+[Interface]
+Address = {{ wireguard_address }}
+ListenPort = {{ wireguard_port }}
+PrivateKey = {{ wireguard_private_key }}
+PostUp = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o {{ vps_public_interface }} -j MASQUERADE; iptables -t nat -A PREROUTING -i {{ vps_public_interface }} -p tcp --dport 80 -j DNAT --to-destination {{ wireguard_pi_ip }}:80; iptables -t nat -A PREROUTING -i {{ vps_public_interface }} -p tcp --dport 443 -j DNAT --to-destination {{ wireguard_pi_ip }}:443; iptables -t nat -A POSTROUTING -o wg0 -j MASQUERADE;
+PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o {{ vps_public_interface }} -j MASQUERADE; iptables -t nat -D PREROUTING -i {{ vps_public_interface }} -p tcp --dport 80 -j DNAT --to-destination {{ wireguard_pi_ip }}:80; iptables -t nat -D PREROUTING -i {{ vps_public_interface }} -p tcp --dport 443 -j DNAT --to-destination {{ wireguard_pi_ip }}:443; iptables -t nat -D POSTROUTING -o wg0 -j MASQUERADE;
+
+[Peer]
+PublicKey = {{ wireguard_peer_public_key }}
+AllowedIPs = {{ wireguard_pi_ip }}/32
