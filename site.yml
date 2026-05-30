@@ -3,4 +3,14 @@
   hosts: all
   become: true
   roles:
-    - wireguard
+    - role: wireguard
+      tags: wireguard
+
+- name: setup docker and traefik
+  hosts: pi_group
+  become: true
+  roles:
+    - role: docker
+      tags: docker
+    - role: traefik
+      tags: traefik

@@ -1,3 +1,5 @@
+traefik_acme_email: "{{ vault_traefik_acme_email }}"
+
 wireguard_address: "10.0.0.2/24"
 wireguard_private_key: "{{ vault_wireguard_private_key }}"     
 wireguard_peer_public_key: "Mtyw+MoEVPmJfAL1mxfESY1UJr6zdt5g1yb/20bdfWA=" 

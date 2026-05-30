@@ -1,0 +1,55 @@
+---
+- name: install docker dependencies
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+    state: present
+    update_cache: true
+  tags: docker
+
+- name: create keyring directory
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  tags: docker
+
+- name: add docker apt key
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/debian/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '0644'
+  tags: docker
+
+- name: get dpkg architecture
+  ansible.builtin.command: dpkg --print-architecture
+  register: dpkg_arch
+  changed_when: false
+  tags: docker
+
+- name: add docker repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch={{ dpkg_arch.stdout }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+    state: present
+    filename: docker
+  tags: docker
+
+- name: install docker
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+    update_cache: true
+  tags: docker
+
+- name: start and enable docker
+  ansible.builtin.systemd:
+    name: docker
+    enabled: true
+    state: started
+  tags: docker
