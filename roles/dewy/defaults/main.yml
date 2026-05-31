@@ -1,0 +1,20 @@
+---
+# --- dewy 本体（全アプリ共通） ---
+# dewy のバージョン（https://github.com/linyows/dewy/releases）
+dewy_version: "2.17.1"
+# dewy の作業ディレクトリ / キャッシュのベース（アプリごとに <base>/<name> を使う）
+dewy_base_dir: /opt/dewy
+dewy_cache_base: /var/cache/dewy
+# Traefik と各アプリコンテナを相互接続する共有 docker ネットワーク
+dewy_network: web
+
+# --- blog アプリ固有 ---
+# semver タグ（v1.0.0 等）が必要。latest は無視される
+blog_registry: "img://ghcr.io/ryomasumura1201/blog-of-the-ryo"
+blog_host: "blog.ryo-of-the-ryo.com"
+# コンテナが内部で listen するポート
+blog_container_port: 8080
+# dewy 内部プロキシがホストに bind するポート。アプリを増やす場合は重複させない
+blog_proxy_port: 8090
+# レジストリのポーリング間隔（秒）
+blog_interval: 60

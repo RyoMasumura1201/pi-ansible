@@ -1,0 +1,56 @@
+---
+# --- dewy 本体（全アプリ共通） ---
+- name: check installed dewy version
+  ansible.builtin.command: dewy --version
+  register: dewy_installed
+  changed_when: false
+  failed_when: false
+  tags: dewy
+
+- name: install dewy binary
+  ansible.builtin.unarchive:
+    src: "https://github.com/linyows/dewy/releases/download/v{{ dewy_version }}/dewy_linux_arm64.tar.gz"
+    dest: /usr/local/bin
+    remote_src: true
+    owner: root
+    group: root
+    mode: '0755'
+  when: dewy_version not in dewy_installed.stdout
+  tags: dewy
+
+- name: ensure shared dewy docker network exists
+  community.docker.docker_network:
+    name: "{{ dewy_network }}"
+    state: present
+  tags: dewy
+
+# --- blog ---
+- name: create blog directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  loop:
+    - "{{ dewy_base_dir }}/blog"
+    - "{{ dewy_cache_base }}/blog"
+  tags: dewy
+
+- name: deploy blog systemd unit
+  ansible.builtin.template:
+    src: blog.service.j2
+    dest: /etc/systemd/system/blog.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart blog
+  tags: dewy
+
+- name: start and enable blog
+  ansible.builtin.systemd:
+    name: blog
+    enabled: true
+    state: started
+    daemon_reload: true
+  tags: dewy

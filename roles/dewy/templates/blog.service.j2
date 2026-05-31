@@ -1,0 +1,40 @@
+[Unit]
+Description=Dewy container deployment for blog
+Documentation=https://github.com/linyows/dewy
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=simple
+Environment=DEWY_CACHEDIR={{ dewy_cache_base }}/blog
+WorkingDirectory={{ dewy_base_dir }}/blog
+# `--` より前は dewy のオプション、`--` より後は docker run へ素通しされる。
+# Traefik は docker provider でこれらのラベルを読み取り、共有ネットワーク
+# {{ dewy_network }} 経由でコンテナの {{ blog_container_port }} 番に直接ルーティングする。
+# ローリング更新中は新旧コンテナが同じラベルを持つため Traefik が両者に分散し、無停止で切り替わる。
+ExecStart=/usr/local/bin/dewy container \
+    --registry {{ blog_registry }} \
+    --log-level info \
+    --interval {{ blog_interval }} \
+    --port {{ blog_proxy_port }}:{{ blog_container_port }} \
+    --health-path / \
+    -- \
+    --network {{ dewy_network }} \
+    -l traefik.enable=true \
+    -l 'traefik.http.routers.blog.rule=Host(`{{ blog_host }}`)' \
+    -l traefik.http.routers.blog.entrypoints=websecure \
+    -l traefik.http.routers.blog.tls=true \
+    -l traefik.http.routers.blog.tls.certresolver=letsencrypt \
+    -l traefik.http.services.blog.loadbalancer.server.port={{ blog_container_port }} \
+    -l 'traefik.http.routers.blog-http.rule=Host(`{{ blog_host }}`)' \
+    -l traefik.http.routers.blog-http.entrypoints=web \
+    -l traefik.http.routers.blog-http.middlewares=redirect-to-https \
+    -l traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
+Restart=always
+RestartSec=10
+KillMode=mixed
+TimeoutStopSec=60
+
+[Install]
+WantedBy=multi-user.target

@@ -1,3 +1,6 @@
 ---
 traefik_dir: /opt/traefik
 traefik_acme_email: "{{ vault_traefik_acme_email }}"
+
+# Traefik と各アプリコンテナ（dewy 管理の blog など）を相互接続する共有ネットワーク
+traefik_network: web
